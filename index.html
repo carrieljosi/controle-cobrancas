@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Controle de Cobranças</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    input, select, textarea, button {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    button {
+      background: #1f4f82;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #173b61;
+    }
+
+    .lista-clientes {
+      display: grid;
+      gap: 15px;
+    }
+
+    .cliente {
+      border-left: 6px solid #999;
+      padding: 15px;
+      border-radius: 10px;
+      background: #fafafa;
+    }
+
+    .pendente {
+      border-left-color: #d9534f;
+    }
+
+    .parcial {
+      border-left-color: #f0ad4e;
+    }
+
+    .pago {
+      border-left-color: #5cb85c;
+    }
+
+    .cliente h3 {
+      margin: 0 0 10px;
+    }
+
+    .cliente p {
+      margin: 6px 0;
+    }
+
+    .vazio {
+      text-align: center;
+      color: #666;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Controle de Cobranças da Gráfica</h1>
+
+    <div class="card">
+      <h2>Cadastrar cliente</h2>
+
+      <div class="grid">
+        <div>
+          <label for="empresa">Nome da empresa</label>
+          <input type="text" id="empresa" placeholder="Ex: Loja Exemplo" />
+        </div>
+
+        <div>
+          <label for="whatsapp">WhatsApp</label>
+          <input type="text" id="whatsapp" placeholder="Ex: 15 99999-9999" />
+        </div>
+
+        <div>
+          <label for="quantidade">Quantidade de calendários</label>
+          <input type="number" id="quantidade" placeholder="Ex: 500" />
+        </div>
+
+        <div>
+          <label for="valorUnitario">Valor unitário</label>
+          <input type="number" id="valorUnitario" step="0.01" placeholder="Ex: 2.90" />
+        </div>
+
+        <div>
+          <label for="status">Status</label>
+          <select id="status">
+            <option value="Pendente">Pendente</option>
+            <option value="Parcial">Parcial</option>
+            <option value="Pago">Pago</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top: 15px;">
+        <label for="observacao">Observação</label>
+        <textarea id="observacao" placeholder="Ex: cobrar sexta / cliente disse que paga depois"></textarea>
+      </div>
+
+      <button onclick="adicionarCliente()">Adicionar cliente</button>
+    </div>
+
+    <div class="card">
+      <h2>Clientes cadastrados</h2>
+      <div id="listaClientes" class="lista-clientes">
+        <div class="vazio">Nenhum cliente cadastrado ainda.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const clientes = [];
+
+    function adicionarCliente() {
+      const empresa = document.getElementById("empresa").value.trim();
+      const whatsapp = document.getElementById("whatsapp").value.trim();
+      const quantidade = Number(document.getElementById("quantidade").value);
+      const valorUnitario = Number(document.getElementById("valorUnitario").value);
+      const status = document.getElementById("status").value;
+      const observacao = document.getElementById("observacao").value.trim();
+
+      if (!empresa || !whatsapp || !quantidade || !valorUnitario) {
+        alert("Preencha empresa, WhatsApp, quantidade e valor unitário.");
+        return;
+      }
+
+      const valorTotal = quantidade * valorUnitario;
+
+      const cliente = {
+        empresa,
+        whatsapp,
+        quantidade,
+        valorUnitario,
+        valorTotal,
+        status,
+        observacao
+      };
+
+      clientes.push(cliente);
+      renderizarClientes();
+      limparFormulario();
+    }
+
+    function renderizarClientes() {
+      const lista = document.getElementById("listaClientes");
+
+      if (clientes.length === 0) {
+        lista.innerHTML = '<div class="vazio">Nenhum cliente cadastrado ainda.</div>';
+        return;
+      }
+
+      lista.innerHTML = "";
+
+      clientes.forEach((cliente) => {
+        const div = document.createElement("div");
+
+        let classeStatus = "pendente";
+        if (cliente.status === "Parcial") classeStatus = "parcial";
+        if (cliente.status === "Pago") classeStatus = "pago";
+
+        div.className = `cliente ${classeStatus}`;
+
+        div.innerHTML = `
+          <h3>${cliente.empresa}</h3>
+          <p><strong>WhatsApp:</strong> ${cliente.whatsapp}</p>
+          <p><strong>Quantidade:</strong> ${cliente.quantidade}</p>
+          <p><strong>Valor unitário:</strong> R$ ${cliente.valorUnitario.toFixed(2)}</p>
+          <p><strong>Valor total:</strong> R$ ${cliente.valorTotal.toFixed(2)}</p>
+          <p><strong>Status:</strong> ${cliente.status}</p>
+          <p><strong>Observação:</strong> ${cliente.observacao || "Sem observação"}</p>
+        `;
+
+        lista.appendChild(div);
+      });
+    }
+
+    function limparFormulario() {
+      document.getElementById("empresa").value = "";
+      document.getElementById("whatsapp").value = "";
+      document.getElementById("quantidade").value = "";
+      document.getElementById("valorUnitario").value = "";
+      document.getElementById("status").value = "Pendente";
+      document.getElementById("observacao").value = "";
+    }
+  </script>
+</body>
+</html>
